@@ -1,0 +1,122 @@
+@import '~css-reset-and-normalize-sass/scss/reset-and-normalize';
+@import '~bootstrap-sass/assets/stylesheets/bootstrap';
+
+
+.none {
+  display: block;
+}
+
+.show {
+  display: none;
+}
+
+.pump {
+  display: inline-flex;
+  width: 600px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.right-side {
+  position: absolute;
+  top: 150px;
+}
+
+.center-side {
+  position: relative;
+}
+
+.main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.main-menu {
+  display: flex;
+  width: 500px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.phrase {
+  display: flex;
+  justify-content: center;
+  width: 500px;
+}
+
+.five-btn {
+  position: absolute;
+  border-radius: 50%;
+  width: 200px;
+  height: 200px;
+}
+
+@keyframes example {
+  from {height: 10px;}
+  to {height: 115px;}
+}
+
+.water{
+  position: absolute;
+  width: 139px;
+  height: 0;
+  background: blue;
+  left: 275px;
+  bottom: 143px;
+  animation-name: example;
+  animation-duration: 16s;
+  animation-fill-mode: forwards;
+}
+
+.markers {
+  position: absolute;
+  width: 31px;
+  height: 31px;
+  border-radius: 50%;
+}
+
+.marker-one {
+  left: 118px;
+  top: 300px;
+}
+
+.marker-two {
+  left: 200px;
+  top: 300px;
+}
+
+.marker-three {
+  left: 406px;
+  top: 305px;
+}
+
+.marker-four {
+  left: 406px;
+  top: 218px;
+}
+
+.marker-five {
+  left: 328px;
+  top: 46px;
+}
+
+.video {
+  display: flex;
+  justify-content: center;
+}
+
+.state-danger {
+  background: red;
+  opacity: 0.8;
+}
+
+.state-safe {
+  background: green;
+  opacity: 0.5;
+}
+
+
+

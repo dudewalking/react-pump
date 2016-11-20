@@ -1,0 +1,8 @@
+node_modules
+.idea
+build/*.eot
+build/*.svg
+build/*.ttf
+build/*.woff
+build/*.woff2
+
