@@ -15,7 +15,9 @@ export default class Pump extends React.Component {
                 {id: 3, name: "three", isOpen: false},
                 {id: 4, name: "four", isOpen: false},
                 {id: 5, name: "five", isOpen: false}
-            ]
+            ],
+            isSafe: false,
+            isCorrectOpen: false
         };
     }
 
@@ -28,18 +30,22 @@ export default class Pump extends React.Component {
             return ctr;
         });
 
-        console.log(updatedControllers);
-
         this.setState({controllers: updatedControllers}, function () {
-            Algorithm.calculate(controller, this.state.controllers);
+            let isCorrectOpen = Algorithm.calculate(controller, this.state.controllers);
+            let isSafe = Algorithm.isSafe;
+            this.setState({isSafe: isSafe, isCorrectOpen: isCorrectOpen});
         });
+
     }
 
     render() {
         return (
             <div className="pump">
-                <PumpControllers controllers={this.state.controllers} calculate={this._calculate.bind(this)}/>
-                <Machine/>
+                <PumpControllers controllers={this.state.controllers}
+                                 isSafe={this.state.isSafe}
+                                 calculate={this._calculate.bind(this)}/>
+                <Machine controllers={this.state.controllers}
+                         isCorrectOpen={this.state.isCorrectOpen}/>
                 <Status/>
                 <Progress />
             </div>
@@ -56,6 +62,7 @@ class PumpControllers extends React.Component {
     render() {
         const buttons = [...this.props.controllers].map(function (button) {
             return <Controller key={button.id} name={button.name}
+                               isSafe={this.props.isSafe}
                                controllers={this.props.controllers}
                                calculate={this._calculate.bind(this)}/>;
         }, this);
@@ -79,13 +86,14 @@ class Controller extends React.Component {
     _calculate() {
         this.props.calculate(this.props.name);
         this.setState({
-            isOpened: !this.state.isOpened
+            isOpened: !this.state.isOpened,
         });
     }
 
     render() {
         return (
             <ReactBootstrapToggle
+                disabled={this.props.isSafe}
                 on={"OPENED"}
                 off={"CLOSED"}
                 active={this.state.isOpened}
@@ -98,6 +106,8 @@ class Machine extends React.Component {
     render() {
         return (
             <div className="center-side">
+                <Markers controllers={this.props.controllers}
+                         isCorrectOpen={this.props.isCorrectOpen}/>
                 <img src="./assets/svg/final-pump.svg" width="500px" height="500px"/>
             </div>
         );
@@ -120,6 +130,37 @@ class Progress extends React.Component {
         const now = 60;
         return (
             <ProgressBar style={{height: 20, width: 600}} active striped now={now} label={`${now}%`}/>
+        );
+    }
+}
+
+
+class Markers extends React.Component {
+    render() {
+
+        const markers = [...this.props.controllers].map(function (marker) {
+            return <Marker key={marker.id} name={marker.name} correct={this.props.isCorrectOpen}/>;
+        }, this);
+
+        return (
+            <div>
+                {markers}
+            </div>
+        );
+    }
+}
+
+
+class Marker extends React.Component {
+
+    render() {
+
+        console.log(this.props.correct);
+
+        let color = this.props.correct ? "state-safe" : "state-danger";
+
+        return (
+            <div className={"markers marker-" + this.props.name + " " + color}/>
         );
     }
 }

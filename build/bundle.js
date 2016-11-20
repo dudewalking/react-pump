@@ -26452,11 +26452,11 @@
 
 	var _reactBootstrap = __webpack_require__(235);
 
-	var _reactBootstrapToggle = __webpack_require__(487);
+	var _reactBootstrapToggle = __webpack_require__(485);
 
 	var _reactBootstrapToggle2 = _interopRequireDefault(_reactBootstrapToggle);
 
-	var _algorithm = __webpack_require__(485);
+	var _algorithm = __webpack_require__(486);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -26477,7 +26477,9 @@
 	        var _this = _possibleConstructorReturn(this, (Pump.__proto__ || Object.getPrototypeOf(Pump)).call(this));
 
 	        _this.state = {
-	            controllers: [{ id: 1, name: "one", isOpen: false }, { id: 2, name: "two", isOpen: false }, { id: 3, name: "three", isOpen: false }, { id: 4, name: "four", isOpen: false }, { id: 5, name: "five", isOpen: false }]
+	            controllers: [{ id: 1, name: "one", isOpen: false }, { id: 2, name: "two", isOpen: false }, { id: 3, name: "three", isOpen: false }, { id: 4, name: "four", isOpen: false }, { id: 5, name: "five", isOpen: false }],
+	            isSafe: false,
+	            isCorrectOpen: false
 	        };
 	        return _this;
 	    }
@@ -26493,10 +26495,10 @@
 	                return ctr;
 	            });
 
-	            console.log(updatedControllers);
-
 	            this.setState({ controllers: updatedControllers }, function () {
-	                _algorithm.Algorithm.calculate(controller, this.state.controllers);
+	                var isCorrectOpen = _algorithm.Algorithm.calculate(controller, this.state.controllers);
+	                var isSafe = _algorithm.Algorithm.isSafe;
+	                this.setState({ isSafe: isSafe, isCorrectOpen: isCorrectOpen });
 	            });
 	        }
 	    }, {
@@ -26505,8 +26507,11 @@
 	            return _react2.default.createElement(
 	                "div",
 	                { className: "pump" },
-	                _react2.default.createElement(PumpControllers, { controllers: this.state.controllers, calculate: this._calculate.bind(this) }),
-	                _react2.default.createElement(Machine, null),
+	                _react2.default.createElement(PumpControllers, { controllers: this.state.controllers,
+	                    isSafe: this.state.isSafe,
+	                    calculate: this._calculate.bind(this) }),
+	                _react2.default.createElement(Machine, { controllers: this.state.controllers,
+	                    isCorrectOpen: this.state.isCorrectOpen }),
 	                _react2.default.createElement(Status, null),
 	                _react2.default.createElement(Progress, null)
 	            );
@@ -26537,6 +26542,7 @@
 	        value: function render() {
 	            var buttons = [].concat(_toConsumableArray(this.props.controllers)).map(function (button) {
 	                return _react2.default.createElement(Controller, { key: button.id, name: button.name,
+	                    isSafe: this.props.isSafe,
 	                    controllers: this.props.controllers,
 	                    calculate: this._calculate.bind(this) });
 	            }, this);
@@ -26577,6 +26583,7 @@
 	        key: "render",
 	        value: function render() {
 	            return _react2.default.createElement(_reactBootstrapToggle2.default, {
+	                disabled: this.props.isSafe,
 	                on: "OPENED",
 	                off: "CLOSED",
 	                active: this.state.isOpened,
@@ -26602,6 +26609,8 @@
 	            return _react2.default.createElement(
 	                "div",
 	                { className: "center-side" },
+	                _react2.default.createElement(Markers, { controllers: this.props.controllers,
+	                    isCorrectOpen: this.props.isCorrectOpen }),
 	                _react2.default.createElement("img", { src: "./assets/svg/final-pump.svg", width: "500px", height: "500px" })
 	            );
 	        }
@@ -26660,6 +26669,58 @@
 	    }]);
 
 	    return Progress;
+	}(_react2.default.Component);
+
+	var Markers = function (_React$Component7) {
+	    _inherits(Markers, _React$Component7);
+
+	    function Markers() {
+	        _classCallCheck(this, Markers);
+
+	        return _possibleConstructorReturn(this, (Markers.__proto__ || Object.getPrototypeOf(Markers)).apply(this, arguments));
+	    }
+
+	    _createClass(Markers, [{
+	        key: "render",
+	        value: function render() {
+
+	            var markers = [].concat(_toConsumableArray(this.props.controllers)).map(function (marker) {
+	                return _react2.default.createElement(Marker, { key: marker.id, name: marker.name, correct: this.props.isCorrectOpen });
+	            }, this);
+
+	            return _react2.default.createElement(
+	                "div",
+	                null,
+	                markers
+	            );
+	        }
+	    }]);
+
+	    return Markers;
+	}(_react2.default.Component);
+
+	var Marker = function (_React$Component8) {
+	    _inherits(Marker, _React$Component8);
+
+	    function Marker() {
+	        _classCallCheck(this, Marker);
+
+	        return _possibleConstructorReturn(this, (Marker.__proto__ || Object.getPrototypeOf(Marker)).apply(this, arguments));
+	    }
+
+	    _createClass(Marker, [{
+	        key: "render",
+	        value: function render() {
+
+	            console.log(this.props.correct);
+
+	            var color = this.props.correct ? "state-safe" : "state-danger";
+
+	            return _react2.default.createElement("div", { className: "markers marker-" + this.props.name + " " + color });
+	        }
+	    }]);
+
+	    return Marker;
 	}(_react2.default.Component);
 
 /***/ },
@@ -45295,81 +45356,6 @@
 
 /***/ },
 /* 485 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	var Algorithm = exports.Algorithm = function () {
-
-	    var calculate = function calculate(controller, controllers) {
-
-	        switch (controller) {
-	            case "five":
-	                {
-	                    if (!(controllers[0].isOpen && controllers[1].isOpen && controllers[2].isOpen && controllers[3].isOpen)) {
-	                        console.log("opened 5");
-	                        break;
-	                    } else {
-	                        console.log("must be closed 5");
-	                        break;
-	                    }
-	                }
-	            case "four":
-	                {
-	                    if (!(controllers[0].isOpen && controllers[1].isOpen && controllers[2].isOpen) && controllers[4].isOpen) {
-	                        console.log("opened 4");
-	                        break;
-	                    } else {
-	                        console.log("must be closed 4");
-	                        break;
-	                    }
-	                }
-	            case "two":
-	                {
-	                    if (!(controllers[0].isOpen && controllers[2].isOpen) && controllers[3].isOpen && controllers[4].isOpen) {
-	                        console.log("opened 2");
-	                        break;
-	                    } else {
-	                        console.log("must be closed 2");
-	                        break;
-	                    }
-	                }
-	            case "three":
-	                {
-	                    if (!controllers[0].isOpen && controllers[1].isOpen && controllers[3].isOpen && controllers[4].isOpen) {
-	                        console.log("opened 3");
-	                        break;
-	                    } else {
-	                        console.log("must be closed 3");
-	                        break;
-	                    }
-	                }
-	            case "one":
-	                {
-	                    if (controllers[1].isOpen && !controllers[2].isOpen && controllers[3].isOpen && controllers[4].isOpen) {
-	                        console.log("opened 1");
-	                        break;
-	                    } else {
-	                        console.log("must be closed 1");
-	                        break;
-	                    }
-	                }
-	            default:
-	                console.log("no activity");
-	        }
-	    };
-
-	    return {
-	        calculate: calculate
-	    };
-	}();
-
-/***/ },
-/* 486 */,
-/* 487 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -45586,6 +45572,84 @@
 	  size: 'normal',
 	  active: true
 	};
+
+/***/ },
+/* 486 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	var Algorithm = exports.Algorithm = function () {
+
+	    var isSafe = false;
+
+	    var calculate = function calculate(controller, controllers) {
+
+	        switch (controller) {
+	            case "five":
+	                {
+	                    if (!(controllers[0].isOpen && controllers[1].isOpen && controllers[2].isOpen && controllers[3].isOpen)) {
+	                        console.log("opened 5");
+	                        return true;
+	                    } else {
+	                        console.log("must be closed 5");
+	                        return false;
+	                    }
+	                }
+	            case "four":
+	                {
+	                    if (!(controllers[0].isOpen && controllers[1].isOpen && controllers[2].isOpen) && controllers[4].isOpen) {
+	                        console.log("opened 4");
+	                        break;
+	                    } else {
+	                        console.log("must be closed 4");
+	                        break;
+	                    }
+	                }
+	            case "two":
+	                {
+	                    if (!(controllers[0].isOpen && controllers[2].isOpen) && controllers[3].isOpen && controllers[4].isOpen) {
+	                        console.log("opened 2");
+	                        break;
+	                    } else {
+	                        console.log("must be closed 2");
+	                        break;
+	                    }
+	                }
+	            case "three":
+	                {
+	                    if (!controllers[0].isOpen && controllers[1].isOpen && controllers[3].isOpen && controllers[4].isOpen) {
+	                        console.log("opened 3");
+	                        break;
+	                    } else {
+	                        console.log("must be closed 3");
+	                        break;
+	                    }
+	                }
+	            case "one":
+	                {
+	                    if (controllers[1].isOpen && !controllers[2].isOpen && controllers[3].isOpen && controllers[4].isOpen) {
+	                        console.log("opened 1");
+	                        this.isSafe = true;
+	                        break;
+	                    } else {
+	                        console.log("must be closed 1");
+	                        break;
+	                    }
+	                }
+	            default:
+	                console.log("no activity");
+	        }
+	    };
+
+	    return {
+	        calculate: calculate,
+	        isSafe: isSafe
+	    };
+	}();
 
 /***/ }
 /******/ ]);

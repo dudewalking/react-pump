@@ -1,15 +1,17 @@
 export let Algorithm = (function () {
 
+    let isSafe = false;
+
     let calculate = function (controller, controllers) {
 
         switch (controller) {
         case "five": {
             if (!(controllers[0].isOpen && controllers[1].isOpen && controllers[2].isOpen && controllers[3].isOpen )) {
                 console.log("opened 5");
-                break;
+                return true;
             } else {
                 console.log("must be closed 5");
-                break;
+                return false;
             }
         }
         case "four": {
@@ -42,6 +44,7 @@ export let Algorithm = (function () {
         case "one": {
             if (controllers[1].isOpen && !controllers[2].isOpen && controllers[3].isOpen && controllers[4].isOpen) {
                 console.log("opened 1");
+                this.isSafe = true;
                 break;
             } else {
                 console.log("must be closed 1");
@@ -56,6 +59,7 @@ export let Algorithm = (function () {
 
     return {
         calculate: calculate,
+        isSafe: isSafe
     };
 
 })();
