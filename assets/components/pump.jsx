@@ -10,18 +10,18 @@ export default class Pump extends React.Component {
         super();
         this.state = {
             controllers: [
-                {id: 1, name: "one", isOpen: false},
-                {id: 2, name: "two", isOpen: false},
-                {id: 3, name: "three", isOpen: false},
-                {id: 4, name: "four", isOpen: false},
-                {id: 5, name: "five", isOpen: false}
+                {id: 1, name: "one", isOpen: false, isCorrectOpen: false},
+                {id: 2, name: "two", isOpen: false, isCorrectOpen: false},
+                {id: 3, name: "three", isOpen: false, isCorrectOpen: false},
+                {id: 4, name: "four", isOpen: false, isCorrectOpen: false},
+                {id: 5, name: "five", isOpen: false, isCorrectOpen: false}
             ],
             isSafe: false,
-            isCorrectOpen: false
+            status: Algorithm.status
         };
     }
 
-    _calculate(controller) {
+    _calculate(controller, isOpened) {
 
         let updatedControllers = [...this.state.controllers].map(function (ctr) {
             if (ctr.name === controller) {
@@ -31,9 +31,24 @@ export default class Pump extends React.Component {
         });
 
         this.setState({controllers: updatedControllers}, function () {
-            let isCorrectOpen = Algorithm.calculate(controller, this.state.controllers);
+            Algorithm.calculate(controller, this.state.controllers, isOpened);
+
+            let isCorrectOpen = Algorithm.isCorrectOpen;
+            console.log(isCorrectOpen);
             let isSafe = Algorithm.isSafe;
-            this.setState({isSafe: isSafe, isCorrectOpen: isCorrectOpen});
+            let status = Algorithm.status;
+            let markerColor = Algorithm.markerColor;
+
+            this.setState({isSafe: isSafe, isCorrectOpen: isCorrectOpen, status: status}, function () {
+                let updControllers = [...this.state.controllers].map(function (ctr) {
+                    if (ctr.name === controller) {
+                        ctr.isCorrectOpen = isCorrectOpen;
+                        ctr.markerColor = markerColor;
+                    }
+                    return ctr;
+                });
+                this.setState({controllers: updControllers});
+            });
         });
 
     }
@@ -44,9 +59,9 @@ export default class Pump extends React.Component {
                 <PumpControllers controllers={this.state.controllers}
                                  isSafe={this.state.isSafe}
                                  calculate={this._calculate.bind(this)}/>
-                <Machine controllers={this.state.controllers}
-                         isCorrectOpen={this.state.isCorrectOpen}/>
-                <Status/>
+
+                <Machine controllers={this.state.controllers}/>
+                <Status status={this.state.status}/>
                 <Progress />
             </div>
         );
@@ -55,8 +70,8 @@ export default class Pump extends React.Component {
 
 class PumpControllers extends React.Component {
 
-    _calculate(controller) {
-        this.props.calculate(controller);
+    _calculate(controller, isOpened) {
+        this.props.calculate(controller, isOpened);
     }
 
     render() {
@@ -84,9 +99,8 @@ class Controller extends React.Component {
     }
 
     _calculate() {
-        this.props.calculate(this.props.name);
-        this.setState({
-            isOpened: !this.state.isOpened,
+        this.setState({isOpened: !this.state.isOpened,}, () => {
+            this.props.calculate(this.props.name, this.state.isOpened);
         });
     }
 
@@ -106,8 +120,7 @@ class Machine extends React.Component {
     render() {
         return (
             <div className="center-side">
-                <Markers controllers={this.props.controllers}
-                         isCorrectOpen={this.props.isCorrectOpen}/>
+                <Markers controllers={this.props.controllers}/>
                 <img src="./assets/svg/final-pump.svg" width="500px" height="500px"/>
             </div>
         );
@@ -119,7 +132,7 @@ class Status extends React.Component {
         return (
             <div className="right-side">
                 <p>Status:</p>
-                <p>Log</p>
+                <p>{this.props.status}</p>
             </div>
         );
     }
@@ -137,10 +150,10 @@ class Progress extends React.Component {
 
 class Markers extends React.Component {
     render() {
-
         const markers = [...this.props.controllers].map(function (marker) {
-            return <Marker key={marker.id} name={marker.name} correct={this.props.isCorrectOpen}/>;
-        }, this);
+            return <Marker key={marker.id} name={marker.name} markerColor={marker.markerColor}/>;
+        });
+        console.log(markers);
 
         return (
             <div>
@@ -152,15 +165,10 @@ class Markers extends React.Component {
 
 
 class Marker extends React.Component {
-
     render() {
 
-        console.log(this.props.correct);
-
-        let color = this.props.correct ? "state-safe" : "state-danger";
-
         return (
-            <div className={"markers marker-" + this.props.name + " " + color}/>
+            <div className={"markers marker-" + this.props.name + " " + this.props.markerColor}/>
         );
     }
 }

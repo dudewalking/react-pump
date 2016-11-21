@@ -26477,16 +26477,16 @@
 	        var _this = _possibleConstructorReturn(this, (Pump.__proto__ || Object.getPrototypeOf(Pump)).call(this));
 
 	        _this.state = {
-	            controllers: [{ id: 1, name: "one", isOpen: false }, { id: 2, name: "two", isOpen: false }, { id: 3, name: "three", isOpen: false }, { id: 4, name: "four", isOpen: false }, { id: 5, name: "five", isOpen: false }],
+	            controllers: [{ id: 1, name: "one", isOpen: false, isCorrectOpen: false }, { id: 2, name: "two", isOpen: false, isCorrectOpen: false }, { id: 3, name: "three", isOpen: false, isCorrectOpen: false }, { id: 4, name: "four", isOpen: false, isCorrectOpen: false }, { id: 5, name: "five", isOpen: false, isCorrectOpen: false }],
 	            isSafe: false,
-	            isCorrectOpen: false
+	            status: _algorithm.Algorithm.status
 	        };
 	        return _this;
 	    }
 
 	    _createClass(Pump, [{
 	        key: "_calculate",
-	        value: function _calculate(controller) {
+	        value: function _calculate(controller, isOpened) {
 
 	            var updatedControllers = [].concat(_toConsumableArray(this.state.controllers)).map(function (ctr) {
 	                if (ctr.name === controller) {
@@ -26496,9 +26496,24 @@
 	            });
 
 	            this.setState({ controllers: updatedControllers }, function () {
-	                var isCorrectOpen = _algorithm.Algorithm.calculate(controller, this.state.controllers);
+	                _algorithm.Algorithm.calculate(controller, this.state.controllers, isOpened);
+
+	                var isCorrectOpen = _algorithm.Algorithm.isCorrectOpen;
+	                console.log(isCorrectOpen);
 	                var isSafe = _algorithm.Algorithm.isSafe;
-	                this.setState({ isSafe: isSafe, isCorrectOpen: isCorrectOpen });
+	                var status = _algorithm.Algorithm.status;
+	                var markerColor = _algorithm.Algorithm.markerColor;
+
+	                this.setState({ isSafe: isSafe, isCorrectOpen: isCorrectOpen, status: status }, function () {
+	                    var updControllers = [].concat(_toConsumableArray(this.state.controllers)).map(function (ctr) {
+	                        if (ctr.name === controller) {
+	                            ctr.isCorrectOpen = isCorrectOpen;
+	                            ctr.markerColor = markerColor;
+	                        }
+	                        return ctr;
+	                    });
+	                    this.setState({ controllers: updControllers });
+	                });
 	            });
 	        }
 	    }, {
@@ -26510,9 +26525,8 @@
 	                _react2.default.createElement(PumpControllers, { controllers: this.state.controllers,
 	                    isSafe: this.state.isSafe,
 	                    calculate: this._calculate.bind(this) }),
-	                _react2.default.createElement(Machine, { controllers: this.state.controllers,
-	                    isCorrectOpen: this.state.isCorrectOpen }),
-	                _react2.default.createElement(Status, null),
+	                _react2.default.createElement(Machine, { controllers: this.state.controllers }),
+	                _react2.default.createElement(Status, { status: this.state.status }),
 	                _react2.default.createElement(Progress, null)
 	            );
 	        }
@@ -26534,8 +26548,8 @@
 
 	    _createClass(PumpControllers, [{
 	        key: "_calculate",
-	        value: function _calculate(controller) {
-	            this.props.calculate(controller);
+	        value: function _calculate(controller, isOpened) {
+	            this.props.calculate(controller, isOpened);
 	        }
 	    }, {
 	        key: "render",
@@ -26574,9 +26588,10 @@
 	    _createClass(Controller, [{
 	        key: "_calculate",
 	        value: function _calculate() {
-	            this.props.calculate(this.props.name);
-	            this.setState({
-	                isOpened: !this.state.isOpened
+	            var _this4 = this;
+
+	            this.setState({ isOpened: !this.state.isOpened }, function () {
+	                _this4.props.calculate(_this4.props.name, _this4.state.isOpened);
 	            });
 	        }
 	    }, {
@@ -26609,8 +26624,7 @@
 	            return _react2.default.createElement(
 	                "div",
 	                { className: "center-side" },
-	                _react2.default.createElement(Markers, { controllers: this.props.controllers,
-	                    isCorrectOpen: this.props.isCorrectOpen }),
+	                _react2.default.createElement(Markers, { controllers: this.props.controllers }),
 	                _react2.default.createElement("img", { src: "./assets/svg/final-pump.svg", width: "500px", height: "500px" })
 	            );
 	        }
@@ -26642,7 +26656,7 @@
 	                _react2.default.createElement(
 	                    "p",
 	                    null,
-	                    "Log"
+	                    this.props.status
 	                )
 	            );
 	        }
@@ -26683,10 +26697,10 @@
 	    _createClass(Markers, [{
 	        key: "render",
 	        value: function render() {
-
 	            var markers = [].concat(_toConsumableArray(this.props.controllers)).map(function (marker) {
-	                return _react2.default.createElement(Marker, { key: marker.id, name: marker.name, correct: this.props.isCorrectOpen });
-	            }, this);
+	                return _react2.default.createElement(Marker, { key: marker.id, name: marker.name, markerColor: marker.markerColor });
+	            });
+	            console.log(markers);
 
 	            return _react2.default.createElement(
 	                "div",
@@ -26712,11 +26726,7 @@
 	        key: "render",
 	        value: function render() {
 
-	            console.log(this.props.correct);
-
-	            var color = this.props.correct ? "state-safe" : "state-danger";
-
-	            return _react2.default.createElement("div", { className: "markers marker-" + this.props.name + " " + color });
+	            return _react2.default.createElement("div", { className: "markers marker-" + this.props.name + " " + this.props.markerColor });
 	        }
 	    }]);
 
@@ -45584,59 +45594,83 @@
 	});
 	var Algorithm = exports.Algorithm = function () {
 
-	    var isSafe = false;
+	    var isSafeToPump = false;
+	    var isCorrectOpen = false;
+	    var isOpen = false;
+	    var status = "Not active";
+	    var markerColor = "state-def";
 
-	    var calculate = function calculate(controller, controllers) {
+	    var calculate = function calculate(controller, controllers, isOpened) {
 
 	        switch (controller) {
 	            case "five":
 	                {
 	                    if (!(controllers[0].isOpen && controllers[1].isOpen && controllers[2].isOpen && controllers[3].isOpen)) {
-	                        console.log("opened 5");
-	                        return true;
+	                        this.status = isOpened ? "opened 5" : "closed 5";
+	                        this.markerColor = isOpened ? "state-safe" : "state-def";
+	                        this.isCorrectOpen = true;
+	                        break;
 	                    } else {
-	                        console.log("must be closed 5");
-	                        return false;
+	                        this.status = "must be closed 5";
+	                        this.markerColor = isOpened ? "state-danger" : "state-def";
+	                        this.isCorrectOpen = false;
+	                        break;
 	                    }
 	                }
 	            case "four":
 	                {
 	                    if (!(controllers[0].isOpen && controllers[1].isOpen && controllers[2].isOpen) && controllers[4].isOpen) {
-	                        console.log("opened 4");
+	                        this.status = isOpened ? "opened 4" : "closed 4";
+	                        this.markerColor = isOpened ? "state-safe" : "state-def";
+	                        this.isCorrectOpen = true;
 	                        break;
 	                    } else {
-	                        console.log("must be closed 4");
+	                        this.status = "must be closed 4";
+	                        this.markerColor = isOpened ? "state-danger" : "state-def";
+	                        this.isCorrectOpen = false;
 	                        break;
 	                    }
 	                }
 	            case "two":
 	                {
-	                    if (!(controllers[0].isOpen && controllers[2].isOpen) && controllers[3].isOpen && controllers[4].isOpen) {
-	                        console.log("opened 2");
+	                    if (!controllers[0].isOpen && !controllers[2].isOpen && controllers[3].isOpen && controllers[4].isOpen) {
+	                        this.status = isOpened ? "opened 2" : "closed 2";
+	                        this.markerColor = isOpened ? "state-safe" : "state-def";
+	                        this.isCorrectOpen = true;
 	                        break;
 	                    } else {
-	                        console.log("must be closed 2");
+	                        this.status = "must be closed 2";
+	                        this.markerColor = isOpened ? "state-danger" : "state-def";
+	                        this.isCorrectOpen = false;
 	                        break;
 	                    }
 	                }
 	            case "three":
 	                {
-	                    if (!controllers[0].isOpen && controllers[1].isOpen && controllers[3].isOpen && controllers[4].isOpen) {
-	                        console.log("opened 3");
+	                    if (!controllers[0].isOpen && !controllers[1].isOpen && controllers[3].isOpen && controllers[4].isOpen) {
+	                        this.status = this.isOpened ? "opened 3" : "closed 3";
+	                        this.markerColor = isOpened ? "state-safe" : "state-def";
+	                        this.isCorrectOpen = true;
 	                        break;
 	                    } else {
-	                        console.log("must be closed 3");
+	                        this.status = "must be closed 3";
+	                        this.markerColor = isOpened ? "state-danger" : "state-def";
+	                        this.isCorrectOpen = false;
 	                        break;
 	                    }
 	                }
 	            case "one":
 	                {
 	                    if (controllers[1].isOpen && !controllers[2].isOpen && controllers[3].isOpen && controllers[4].isOpen) {
-	                        console.log("opened 1");
 	                        this.isSafe = true;
+	                        this.status = this.isOpened ? "opened 1" : "closed 1";
+	                        this.markerColor = isOpened ? "state-safe" : "state-def";
+	                        this.isCorrectOpen = true;
 	                        break;
 	                    } else {
-	                        console.log("must be closed 1");
+	                        this.status = "must be closed 1";
+	                        this.markerColor = isOpened ? "state-danger" : "state-def";
+	                        this.isCorrectOpen = false;
 	                        break;
 	                    }
 	                }
@@ -45647,7 +45681,11 @@
 
 	    return {
 	        calculate: calculate,
-	        isSafe: isSafe
+	        isSafe: isSafeToPump,
+	        isCorrectOpen: isCorrectOpen,
+	        isOpen: isOpen,
+	        status: status,
+	        markerColor: markerColor
 	    };
 	}();
 
