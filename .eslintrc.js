@@ -32,6 +32,15 @@ module.exports = {
         "semi": [
             "error",
             "always"
+        ],
+        "no-unused-vars": [
+            "off"
+        ],
+        "no-console": [
+            "off"
+        ],
+        "no-mixed-spaces-and-tabs" : [
+            "off"
         ]
     }
 };
