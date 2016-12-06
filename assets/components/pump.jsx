@@ -2,7 +2,6 @@ import React from "react";
 import {ProgressBar, ButtonGroup} from "react-bootstrap";
 import {BootstrapTable, TableHeaderColumn} from "react-bootstrap-table";
 import ReactBootstrapToggle from "react-bootstrap-toggle";
-import {Algorithm} from "./algorithm.js";
 import {DataCheck} from "./replacement.js";
 
 
@@ -12,22 +11,65 @@ export default class Pump extends React.Component {
 		super();
 		this.state = {
 			controllers: [
-                {id: 1, name: "one", isOpen: false, isCorrectOpen: false, markerColor: "state-def"},
-                {id: 2, name: "two", isOpen: false, isCorrectOpen: false, markerColor: "state-def"},
-                {id: 3, name: "three", isOpen: false, isCorrectOpen: false, markerColor: "state-def"},
-                {id: 4, name: "four", isOpen: false, isCorrectOpen: false, markerColor: "state-def"},
-                {id: 5, name: "five", isOpen: false, isCorrectOpen: false, markerColor: "state-def"}
+				{
+					id: 1,
+					name: "one",
+					isOpen: false,
+					isCorrectOpen: true,
+					isOpenText: "ВЫКЛ.",
+					isCorrectText: "НЕ АКТИВНО",
+					markerColor: "state-def"
+				},
+				{
+					id: 2,
+					name: "two",
+					isOpen: false,
+					isCorrectOpen: true,
+					isOpenText: "ВЫКЛ",
+					isCorrectText: "НЕ АКТИВНО",
+					markerColor: "state-def"
+				},
+				{
+					id: 3,
+					name: "three",
+					isOpen: false,
+					isCorrectOpen: true,
+					isOpenText: "ВЫКЛ",
+					isCorrectText: "НЕ АКТИВНО",
+					markerColor: "state-def"
+				},
+				{
+					id: 4,
+					name: "four",
+					isOpen: false,
+					isCorrectOpen: true,
+					isOpenText: "ВЫКЛ",
+					isCorrectText: "НЕ АКТИВНО",
+					markerColor: "state-def"
+				},
+				{
+					id: 5,
+					name: "five",
+					isOpen: false,
+					isCorrectOpen: true,
+					isOpenText: "ВЫКЛ",
+					isCorrectText: "НЕ АКТИВНО",
+					markerColor: "state-def"
+				}
 			],
 			isSafe: false,
 			isAllowed: true,
-			status: Algorithm.status
+			status: "Not active"
 		};
 	}
 
 
 	_compare(controller, isOpened) {
+
+		let updatedStatus = "";
+
 		let updatedControllers = [...this.state.controllers].map(function (ctr) {
-			if (ctr.name === controller) {
+			if (ctr.name === controller.name) {
 				ctr.isOpen = !ctr.isOpen;
 			}
 			ctr.isOpen = +ctr.isOpen;
@@ -36,58 +78,44 @@ export default class Pump extends React.Component {
 
 		let result = DataCheck.check(updatedControllers.join(""));
 
-        console.log(updatedControllers);
-        console.log(result);
 
-        let updatedControllers2 = [...this.state.controllers].map(function (ctr) {
-			if (ctr.name === controller) {
+		let updatedControllers2 = [...this.state.controllers].map(function (ctr) {
+			if (ctr.id === controller.id) {
 				if (isOpened && result.markerColor) {
 					ctr.markerColor = "state-safe";
+					ctr.isCorrectOpen = true;
+					ctr.isOpenText = "ВКЛ.";
+					ctr.isCorrectText = "БЕЗОПАСНО";
+					updatedStatus = `Controller №${ctr.id} is open`;
 				}
 				else if (isOpened && !result.markerColor) {
 					ctr.markerColor = "state-danger";
-				} else {
+					ctr.isCorrectOpen = false;
+					ctr.isCorrectText = "ОПАСНО!";
+					updatedStatus = `Controller №${ctr.id} must be closed!`;
+				}
+				else {
 					ctr.markerColor = "state-def";
+					ctr.isCorrectOpen = true;
+					ctr.isOpenText = "ВЫКЛ.";
+					ctr.isCorrectText = "НЕ АКТИВНО";
+					updatedStatus = `Controller №${ctr.id} is closed`;
 				}
 			}
 			return ctr;
 		});
 
+		if (controller.id === 1 && isOpened && result.markerColor) {
+			updatedStatus = "The filling has begun!";
+			this.setState({isSafe: true});
+		}
+
 		this.setState({
 			isAllowed: result.objState,
-			controllers: updatedControllers2
+			controllers: updatedControllers2,
+			status: updatedStatus
 		});
 	}
-
-    // _calculate(controller, isOpened) {
-    //
-    // 	let updatedControllers = [...this.state.controllers].map(function (ctr) {
-    // 		if (ctr.name === controller) {
-    // 			ctr.isOpen = !ctr.isOpen;
-    // 		}
-    // 		return ctr;
-    // 	});
-    //
-    // 	this.setState({controllers: updatedControllers}, function () {
-    // 		Algorithm.calculate(controller, this.state.controllers, isOpened);
-    // 		let isCorrectOpen = Algorithm.isCorrectOpen;
-    // 		let isSafe = Algorithm.isSafe;
-    // 		let status = Algorithm.status;
-    // 		let markerColor = Algorithm.markerColor;
-    //
-    // 		this.setState({isSafe: isSafe, status: status}, function () {
-    // 			let updControllers = [...this.state.controllers].map(function (ctr) {
-    // 				if (ctr.name === controller) {
-    // 					ctr.isCorrectOpen = isCorrectOpen;
-    // 					ctr.markerColor = markerColor;
-    // 				}
-    // 				return ctr;
-    // 			});
-    // 			this.setState({controllers: updControllers});
-    // 		});
-    // 	});
-    //
-    // }
 
 	render() {
 		return (
@@ -107,18 +135,14 @@ export default class Pump extends React.Component {
 
 class PumpControllers extends React.Component {
 
-    // _calculate(controller, isOpened) {
-    // 	this.props.calculate(controller, isOpened);
-    // }
-
 	_compare(controller, isOpened) {
 		this.props.compare(controller, isOpened);
 	}
 
 	render() {
-		const buttons = [...this.props.controllers].map(function (button) {
+		const buttons = [...this.props.controllers].map(function (controller) {
 			return (
-                <Controller key={button.id} name={button.name}
+                <Controller key={controller.id} controller={controller}
                             isSafe={this.props.isSafe}
                             controllers={this.props.controllers}
                             compare={this._compare.bind(this)}/>
@@ -143,7 +167,7 @@ class Controller extends React.Component {
 
 	_calculate() {
 		this.setState({isOpened: !this.state.isOpened,}, () => {
-			this.props.compare(this.props.name, this.state.isOpened);
+			this.props.compare(this.props.controller, this.state.isOpened);
 		});
 	}
 
@@ -229,8 +253,8 @@ class ControllersTable extends React.Component {
             <BootstrapTable data={this.props.controllers} striped hover>
                 <TableHeaderColumn isKey dataField='id'>Controller ID</TableHeaderColumn>
                 <TableHeaderColumn dataField='name'>Controller Name</TableHeaderColumn>
-                <TableHeaderColumn dataField='isOpen'>On/Off</TableHeaderColumn>
-                <TableHeaderColumn dataField='isCorrectOpen'>Controller State</TableHeaderColumn>
+                <TableHeaderColumn dataField='isOpenText'>On/Off</TableHeaderColumn>
+                <TableHeaderColumn dataField='isCorrectText'>Controller State</TableHeaderColumn>
             </BootstrapTable>
 		);
 	}
