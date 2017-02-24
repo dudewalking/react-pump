@@ -2,6 +2,7 @@
 @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap";
 @import "../../node_modules/react-bootstrap-toggle/lib/bootstrap2-toggle";
 @import "../../node_modules/react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
+@import "./react-toggle";
 
 
 .none {
@@ -14,7 +15,7 @@
 
 .pump {
   display: inline-flex;
-  width: 600px;
+  width: 900px;
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
@@ -121,7 +122,7 @@
 }
 
 .controllers {
-  width: 100px;
+  width: 150px;
 }
 
 

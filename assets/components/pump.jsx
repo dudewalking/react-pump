@@ -1,72 +1,24 @@
 import React from "react";
 import {ProgressBar, ButtonGroup} from "react-bootstrap";
 import {BootstrapTable, TableHeaderColumn} from "react-bootstrap-table";
-import ReactBootstrapToggle from "react-bootstrap-toggle";
-import {DataCheck} from "./simple/replacement.js";
+import {DataCheck} from "./solution-2/replacement.js";
+import {controllers} from "../data";
+import Toggle from "react-toggle";
 
 
 export default class Pump extends React.Component {
     constructor() {
         super();
         this.state = {
-            controllers: [
-                {
-                    id: 1,
-                    name: "one",
-                    isOpen: false,
-                    isCorrectOpen: true,
-                    isOpenText: "ВЫКЛ.",
-                    isCorrectText: "НЕ АКТИВНО",
-                    markerColor: "state-def"
-                },
-                {
-                    id: 2,
-                    name: "two",
-                    isOpen: false,
-                    isCorrectOpen: true,
-                    isOpenText: "ВЫКЛ",
-                    isCorrectText: "НЕ АКТИВНО",
-                    markerColor: "state-def"
-                },
-                {
-                    id: 3,
-                    name: "three",
-                    isOpen: false,
-                    isCorrectOpen: true,
-                    isOpenText: "ВЫКЛ",
-                    isCorrectText: "НЕ АКТИВНО",
-                    markerColor: "state-def"
-                },
-                {
-                    id: 4,
-                    name: "four",
-                    isOpen: false,
-                    isCorrectOpen: true,
-                    isOpenText: "ВЫКЛ",
-                    isCorrectText: "НЕ АКТИВНО",
-                    markerColor: "state-def"
-                },
-                {
-                    id: 5,
-                    name: "five",
-                    isOpen: false,
-                    isCorrectOpen: true,
-                    isOpenText: "ВЫКЛ",
-                    isCorrectText: "НЕ АКТИВНО",
-                    markerColor: "state-def"
-                }
-            ],
+            controllers: controllers,
             isSafe: false,
             isAllowed: true,
             status: "Not active"
         };
     }
 
-
     _compare(controller, isOpened) {
-
         let updatedStatus = "";
-
         let updatedControllers = [...this.state.controllers].map(function (ctr) {
             if (ctr.name === controller.name) {
                 ctr.isOpen = !ctr.isOpen;
@@ -76,7 +28,6 @@ export default class Pump extends React.Component {
         });
 
         let result = DataCheck.check(updatedControllers.join(""));
-
 
         let updatedControllers2 = [...this.state.controllers].map(function (ctr) {
             if (ctr.id === controller.id) {
@@ -133,22 +84,21 @@ export default class Pump extends React.Component {
 }
 
 class PumpControllers extends React.Component {
-
     _compare(controller, isOpened) {
         this.props.compare(controller, isOpened);
     }
-
     render() {
         const buttons = [...this.props.controllers].map(function (controller) {
             return (
-                <Controller key={controller.id} controller={controller}
+                <Controller key={controller.id}
+                            controller={controller}
                             isSafe={this.props.isSafe}
                             controllers={this.props.controllers}
                             compare={this._compare.bind(this)}/>
             );
         }, this);
         return (
-            <ButtonGroup vertical>
+            <ButtonGroup className="controllers">
                 {buttons}
             </ButtonGroup>
         );
@@ -156,28 +106,27 @@ class PumpControllers extends React.Component {
 }
 
 class Controller extends React.Component {
-
     constructor(props) {
         super(props);
         this.state = {
             isOpened: false
         };
     }
-
     _calculate() {
         this.setState({isOpened: !this.state.isOpened,}, () => {
             this.props.compare(this.props.controller, this.state.isOpened);
         });
     }
-
     render() {
         return (
-            <ReactBootstrapToggle
-                disabled={this.props.isSafe}
-                on={"OPENED"}
-                off={"CLOSED"}
-                active={this.state.isOpened}
-                onChange={this._calculate.bind(this)}/>
+            <label>
+                <Toggle
+                    defaultChecked={this.state.isOpened}
+                    icons={false}
+                    disabled={this.props.isSafe}
+                    onChange={this._calculate.bind(this)} />
+                <span className="label-text">{this.props.controller.name}</span>
+            </label>
         );
     }
 }
@@ -206,14 +155,12 @@ class Status extends React.Component {
 }
 
 class Progress extends React.Component {
-
     constructor(props) {
         super(props);
         this.state = {
             progress: 0
         };
     }
-
     render() {
         return (
             <ProgressBar style={{height: 20, width: 600}} max={100} min={0} active striped now={this.state.progress}
