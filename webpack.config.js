@@ -8,30 +8,30 @@ module.exports = [
     {
         name: "js",
         entry: "./assets/app.js",
-        output: {path: __dirname + "/build", filename: "bundle.js"},
+        output: {
+            path: __dirname + "/build/js",
+            filename: "bundle.js"
+        },
         module: {
             loaders: [
                 {
                     test: /\.jsx?$/,
-                    loader: "babel",
                     exclude: /node_modules/,
+                    loader: "babel-loader",
                     query: {
                         presets: ["react", "es2015"]
                     }
                 }
             ]
         },
-        devServer: {
-            port: 9000,
-            historyApiFallback: true,
-            contentBase: "./",
-            hot: true
-        }
     },
     {
         name: "css",
         entry: "./assets/styles/main.scss",
-        output: {path: __dirname + "/build", filename: "styles.css"},
+        output: {
+            path: __dirname + "/build/css",
+            filename: "styles.css"
+        },
         module: {
             loaders: [
                 {

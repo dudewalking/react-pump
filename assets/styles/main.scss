@@ -1,5 +1,7 @@
-@import '~css-reset-and-normalize-sass/scss/reset-and-normalize';
-@import '~bootstrap-sass/assets/stylesheets/bootstrap';
+@import "../../node_modules/css-reset-and-normalize-sass/scss/reset-and-normalize";
+@import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap";
+@import "../../node_modules/react-bootstrap-toggle/lib/bootstrap2-toggle";
+@import "../../node_modules/react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
 
 
 .none {
