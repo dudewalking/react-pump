@@ -34,6 +34,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  height: 800px;
 }
 
 .main-menu {
@@ -57,19 +58,36 @@
   height: 200px;
 }
 
-@keyframes example {
+@keyframes fill {
   from {height: 10px;}
   to {height: 115px;}
 }
 
-.water{
+@keyframes drain {
+  from {height: 115px;}
+  to {height: 0;}
+}
+
+.water-fill{
   position: absolute;
   width: 139px;
   height: 0;
   background: blue;
   left: 275px;
   bottom: 143px;
-  animation-name: example;
+  animation-name: fill;
+  animation-duration: 16s;
+  animation-fill-mode: forwards;
+}
+
+.water-drain{
+  position: absolute;
+  width: 139px;
+  height: 0;
+  background: blue;
+  left: 275px;
+  bottom: 143px;
+  animation-name: drain;
   animation-duration: 16s;
   animation-fill-mode: forwards;
 }

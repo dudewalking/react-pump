@@ -19,7 +19,7 @@ export default class Progress extends React.Component {
             if (this.state.progress < 100) {
                 setTimeout((() => {
                     this.setState({progress: this.state.progress + 1});
-                }), 150);
+                }), 15);
             } else {
                 clearTimeout();
                 setTimeout(() => this._updateStatus(), 100);

@@ -16,12 +16,20 @@ export default class Pump extends React.Component {
             controllers: controllers,
             isSafe: false,
             isAllowed: true,
+            isAbleToDrain: false,
             status: "Не активен"
         };
     }
 
     _updateStatus() {
         this.setState({status: "Заполнение завершилось!"});
+    }
+
+    _ableToDrain() {
+        this.setState({
+            isAbleToDrain: true,
+            isSafe: false,
+        });
     }
 
     _compare(controller, isOpened) {
@@ -79,13 +87,17 @@ export default class Pump extends React.Component {
             <div className="pump">
                 <PumpControllers isSafe={this.state.isSafe}
                                  controllers={this.state.controllers}
-                                 compare={this._compare.bind(this)}/>
+                                 compare={(controller, isOpened) => this._compare(controller, isOpened)}/>
 
                 <Machine isSafe={this.state.isSafe}
+                         isAbleToDrain={this.state.isAbleToDrain}
                          controllers={this.state.controllers}/>
 
-                <Status status={this.state.status}/>
+                <Status status={this.state.status}
+                        ableToDrain={() => this._ableToDrain()}/>
+
                 <Progress isSafe={this.state.isSafe}
+                          isAbleToDrain={this.state.isAbleToDrain}
                           updateStatus={() => this._updateStatus()}/>
 
                 <ControllersTable controllers={this.state.controllers}/>
