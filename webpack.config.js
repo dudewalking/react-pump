@@ -9,7 +9,7 @@ module.exports = [
         name: "js",
         entry: "./assets/app.js",
         output: {
-            path: __dirname + "/build/js",
+            path: __dirname + "/build",
             filename: "bundle.js"
         },
         module: {
@@ -29,7 +29,7 @@ module.exports = [
         name: "css",
         entry: "./assets/styles/main.scss",
         output: {
-            path: __dirname + "/build/css",
+            path: __dirname + "/build",
             filename: "styles.css"
         },
         module: {
