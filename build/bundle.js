@@ -26662,20 +26662,93 @@
 	        _this.state = {
 	            controllers: _data.controllers,
 	            isSafe: false,
+	            isFull: false,
 	            isAllowed: true,
-	            status: "Не активен"
+	            isAbleToDrain: false,
+	            status: "Не активен",
+	            progress: 0
 	        };
 	        return _this;
 	    }
 
 	    _createClass(Pump, [{
+	        key: "componentDidUpdate",
+	        value: function componentDidUpdate() {
+	            if (this.state.isSafe) {
+	                this._runProgress();
+	            }
+	        }
+	    }, {
 	        key: "_updateStatus",
-	        value: function _updateStatus() {
-	            this.setState({ status: "Заполнение завершилось!" });
+	        value: function _updateStatus(status) {
+	            this.setState({ status: status });
+	        }
+	    }, {
+	        key: "_ableToDrain",
+	        value: function _ableToDrain() {
+	            var _this2 = this;
+
+	            var updatedControllers = [].concat(_toConsumableArray(this.state.controllers)).map(function (ctr) {
+	                if (ctr.id === 3) {
+	                    ctr.markerColor = "state-safe";
+	                    ctr.isOpen = true;
+	                    ctr.isCorrectOpen = true;
+	                    ctr.isOpenText = "ВКЛ.";
+	                    ctr.isCorrectText = "БЕЗОПАСНО";
+	                } else {
+	                    ctr.markerColor = "state-def";
+	                    ctr.isOpen = false;
+	                    ctr.isCorrectOpen = true;
+	                    ctr.isOpenText = "ВЫКЛ.";
+	                    ctr.isCorrectText = "НЕ АКТИВНО";
+	                }
+	                return ctr;
+	            });
+
+	            this.setState({
+	                isAbleToDrain: true,
+	                isSafe: false,
+	                progress: 0,
+	                controllers: updatedControllers
+	            });
+
+	            setTimeout(function () {
+	                var updatedControllers2 = [].concat(_toConsumableArray(_this2.state.controllers)).map(function (ctr) {
+	                    if (ctr.id === 3) {
+	                        ctr.markerColor = "state-def";
+	                        ctr.isOpen = false;
+	                        ctr.isCorrectOpen = true;
+	                        ctr.isOpenText = "ВЫКЛ.";
+	                        ctr.isCorrectText = "НЕ АКТИВНО";
+	                    }
+	                    return ctr;
+	                });
+	                _this2.setState({ isFull: false, isAbleToDrain: false, controllers: updatedControllers2 });
+	                _this2._updateStatus("Слив Завершен!");
+	            }, 4000);
+	        }
+	    }, {
+	        key: "_runProgress",
+	        value: function _runProgress() {
+	            var _this3 = this;
+
+	            if (this.state.isSafe) {
+	                if (this.state.progress < 100) {
+	                    setTimeout(function () {
+	                        _this3.setState({ progress: _this3.state.progress + 1 });
+	                    }, 100);
+	                } else {
+	                    clearTimeout();
+	                    this.setState({ isSafe: false, isFull: true });
+	                    setTimeout(function () {
+	                        return _this3._updateStatus("Заполнение завершилось!");
+	                    }, 100);
+	                }
+	            }
 	        }
 	    }, {
 	        key: "_compare",
-	        value: function _compare(controller, isOpened) {
+	        value: function _compare(controller) {
 	            var updatedStatus = "";
 	            var updatedControllers = [].concat(_toConsumableArray(this.state.controllers)).map(function (ctr) {
 	                if (ctr.name === controller.name) {
@@ -26685,17 +26758,17 @@
 	                return ctr.isOpen;
 	            });
 
-	            var result = _replacement.DataCheck.check(updatedControllers.join(""));
+	            var result = _replacement.checkAndReplace.check(updatedControllers.join(""));
 
 	            var updatedControllers2 = [].concat(_toConsumableArray(this.state.controllers)).map(function (ctr) {
 	                if (ctr.id === controller.id) {
-	                    if (isOpened && result.markerColor) {
+	                    if (ctr.isOpen && result.markerColor) {
 	                        ctr.markerColor = "state-safe";
 	                        ctr.isCorrectOpen = true;
 	                        ctr.isOpenText = "ВКЛ.";
 	                        ctr.isCorrectText = "БЕЗОПАСНО";
 	                        updatedStatus = "\u041A\u043E\u043D\u0442\u0440\u043E\u043B\u043B\u0435\u0440 \u2116" + ctr.id + " \u043E\u0442\u043A\u0440\u044B\u0442";
-	                    } else if (isOpened && !result.markerColor) {
+	                    } else if (ctr.isOpen && !result.markerColor) {
 	                        ctr.markerColor = "state-danger";
 	                        ctr.isCorrectOpen = false;
 	                        ctr.isCorrectText = "ОПАСНО";
@@ -26711,7 +26784,7 @@
 	                return ctr;
 	            });
 
-	            if (controller.id === 1 && isOpened && result.markerColor) {
+	            if (controller.id === 1 && controller.isOpen && result.markerColor) {
 	                updatedStatus = "Заполнение началось!";
 	                this.setState({ isSafe: true });
 	            }
@@ -26725,20 +26798,34 @@
 	    }, {
 	        key: "render",
 	        value: function render() {
-	            var _this2 = this;
+	            var _this4 = this;
 
 	            return _react2.default.createElement(
 	                "div",
 	                { className: "pump" },
 	                _react2.default.createElement(_pumpControllers2.default, { isSafe: this.state.isSafe,
+	                    isFull: this.state.isFull,
+	                    isAbleToDrain: this.state.isAbleToDrain,
 	                    controllers: this.state.controllers,
-	                    compare: this._compare.bind(this) }),
+	                    compare: function compare(controller, isOpened) {
+	                        return _this4._compare(controller, isOpened);
+	                    } }),
 	                _react2.default.createElement(_machine2.default, { isSafe: this.state.isSafe,
+	                    isFull: this.state.isFull,
+	                    isAbleToDrain: this.state.isAbleToDrain,
 	                    controllers: this.state.controllers }),
-	                _react2.default.createElement(_status2.default, { status: this.state.status }),
+	                _react2.default.createElement(_status2.default, { status: this.state.status,
+	                    ableToDrain: function ableToDrain() {
+	                        return _this4._ableToDrain();
+	                    },
+	                    updateStatus: function updateStatus(status) {
+	                        return _this4._updateStatus(status);
+	                    } }),
 	                _react2.default.createElement(_progress2.default, { isSafe: this.state.isSafe,
-	                    updateStatus: function updateStatus() {
-	                        return _this2._updateStatus();
+	                    isAbleToDrain: this.state.isAbleToDrain,
+	                    progress: this.state.progress,
+	                    updateStatus: function updateStatus(status) {
+	                        return _this4._updateStatus(status);
 	                    } }),
 	                _react2.default.createElement(_controllersTable2.default, { controllers: this.state.controllers })
 	            );
@@ -26759,7 +26846,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	var DataCheck = exports.DataCheck = function () {
+	var checkAndReplace = exports.checkAndReplace = function () {
 
 	    var wrongStates = ["10000", "10001", "10010", "10011", "10100", "10101", "10110", "10111", "11000", "11001", "11010", "11100", "11101", "11110", "11111"];
 
@@ -26867,46 +26954,23 @@
 	var Progress = function (_React$Component) {
 	    _inherits(Progress, _React$Component);
 
-	    function Progress(props) {
+	    function Progress() {
 	        _classCallCheck(this, Progress);
 
-	        var _this = _possibleConstructorReturn(this, (Progress.__proto__ || Object.getPrototypeOf(Progress)).call(this, props));
-
-	        _this.state = {
-	            progress: 0
-	        };
-	        return _this;
+	        return _possibleConstructorReturn(this, (Progress.__proto__ || Object.getPrototypeOf(Progress)).apply(this, arguments));
 	    }
 
 	    _createClass(Progress, [{
-	        key: "_updateStatus",
-	        value: function _updateStatus() {
-	            this.props.updateStatus();
-	        }
-	    }, {
 	        key: "render",
 	        value: function render() {
-	            var _this2 = this;
-
-	            if (this.props.isSafe) {
-	                if (this.state.progress < 100) {
-	                    setTimeout(function () {
-	                        _this2.setState({ progress: _this2.state.progress + 1 });
-	                    }, 150);
-	                } else {
-	                    clearTimeout();
-	                    setTimeout(function () {
-	                        return _this2._updateStatus();
-	                    }, 100);
-	                }
-	            }
-	            return _react2.default.createElement(_reactBootstrap.ProgressBar, { style: { height: 20, width: 600 },
+	            return _react2.default.createElement(_reactBootstrap.ProgressBar, { style: { height: 20, width: 600,
+	                    visibility: this.props.isSafe ? "visible" : "hidden" },
 	                min: 0,
 	                max: 100,
 	                active: true,
 	                striped: true,
-	                now: this.state.progress,
-	                label: this.state.progress + "%" });
+	                now: this.props.progress,
+	                label: this.props.progress + "%" });
 	        }
 	    }]);
 
@@ -46253,19 +46317,22 @@
 
 	    _createClass(PumpControllers, [{
 	        key: "_compare",
-	        value: function _compare(controller, isOpened) {
-	            this.props.compare(controller, isOpened);
+	        value: function _compare(controller) {
+	            this.props.compare(controller);
 	        }
 	    }, {
 	        key: "render",
 	        value: function render() {
+	            var _this2 = this;
+
 	            var buttons = [].concat(_toConsumableArray(this.props.controllers)).map(function (controller) {
 	                return _react2.default.createElement(_controller2.default, { key: controller.id,
 	                    controller: controller,
-	                    isSafe: this.props.isSafe,
-	                    controllers: this.props.controllers,
-	                    compare: this._compare.bind(this) });
-	            }, this);
+	                    isSafe: _this2.props.isSafe,
+	                    isFull: _this2.props.isFull,
+	                    isAbleToDrain: _this2.props.isAbleToDrain,
+	                    compare: _this2._compare.bind(_this2) });
+	            });
 	            return _react2.default.createElement(
 	                _reactBootstrap.ButtonGroup,
 	                { className: "controllers" },
@@ -46310,37 +46377,32 @@
 	var Controller = function (_React$Component) {
 	    _inherits(Controller, _React$Component);
 
-	    function Controller(props) {
+	    function Controller() {
 	        _classCallCheck(this, Controller);
 
-	        var _this = _possibleConstructorReturn(this, (Controller.__proto__ || Object.getPrototypeOf(Controller)).call(this, props));
-
-	        _this.state = {
-	            isOpened: false
-	        };
-	        return _this;
+	        return _possibleConstructorReturn(this, (Controller.__proto__ || Object.getPrototypeOf(Controller)).apply(this, arguments));
 	    }
 
 	    _createClass(Controller, [{
 	        key: "_calculate",
 	        value: function _calculate() {
-	            var _this2 = this;
-
-	            this.setState({ isOpened: !this.state.isOpened }, function () {
-	                _this2.props.compare(_this2.props.controller, _this2.state.isOpened);
-	            });
+	            this.props.compare(this.props.controller);
 	        }
 	    }, {
 	        key: "render",
 	        value: function render() {
+	            var _this2 = this;
+
 	            return _react2.default.createElement(
 	                "label",
 	                null,
 	                _react2.default.createElement(_reactToggle2.default, {
-	                    defaultChecked: this.state.isOpened,
+	                    checked: !!this.props.controller.isOpen,
 	                    icons: false,
-	                    disabled: this.props.isSafe,
-	                    onChange: this._calculate.bind(this) }),
+	                    disabled: this.props.isSafe || this.props.isFull || this.props.isAbleToDrain,
+	                    onChange: function onChange() {
+	                        return _this2._calculate();
+	                    } }),
 	                _react2.default.createElement(
 	                    "span",
 	                    { className: "label-text" },
@@ -46718,7 +46780,7 @@
 	                "div",
 	                { className: "center-side" },
 	                _react2.default.createElement(_markers2.default, { controllers: this.props.controllers }),
-	                _react2.default.createElement("div", { className: this.props.isSafe ? "water" : "" }),
+	                _react2.default.createElement("div", { className: this.props.isAbleToDrain ? "water-drain" : this.props.isSafe ? "water-fill" : this.props.isFull ? "water-fill" : "" }),
 	                _react2.default.createElement("img", { src: "./assets/svg/final-pump.svg", width: "500px", height: "500px" })
 	            );
 	        }
@@ -46848,6 +46910,8 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
+	var _reactBootstrap = __webpack_require__(238);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -46866,8 +46930,20 @@
 	    }
 
 	    _createClass(Status, [{
+	        key: "_ableToDrain",
+	        value: function _ableToDrain() {
+	            this.props.ableToDrain();
+	        }
+	    }, {
+	        key: "_updateStatus",
+	        value: function _updateStatus(status) {
+	            this.props.updateStatus(status);
+	        }
+	    }, {
 	        key: "render",
 	        value: function render() {
+	            var _this2 = this;
+
 	            return _react2.default.createElement(
 	                "div",
 	                { className: "right-side" },
@@ -46880,7 +46956,15 @@
 	                    "p",
 	                    null,
 	                    this.props.status
-	                )
+	                ),
+	                this.props.status === "Заполнение завершилось!" ? _react2.default.createElement(
+	                    _reactBootstrap.Button,
+	                    { onClick: function onClick() {
+	                            _this2._ableToDrain();
+	                            _this2._updateStatus("Слив запущен!");
+	                        } },
+	                    "\u0417\u0430\u043F\u0443\u0441\u0442\u0438\u0442\u044C \u0421\u043B\u0438\u0432"
+	                ) : null
 	            );
 	        }
 	    }]);

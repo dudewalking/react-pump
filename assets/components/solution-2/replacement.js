@@ -1,4 +1,4 @@
-export let DataCheck = (function () {
+export let checkAndReplace = (() => {
 
     const wrongStates = [
         "10000",
@@ -18,8 +18,7 @@ export let DataCheck = (function () {
         "11111"
     ];
 
-
-    let checkState = function (currentState) {
+    let checkState = (currentState) => {
 
         let objState = true;
         let markerColor = true;

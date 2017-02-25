@@ -2,27 +2,19 @@ import React from "react";
 import Toggle from "react-toggle";
 
 export default class Controller extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            isOpened: false
-        };
-    }
 
     _calculate() {
-        this.setState({isOpened: !this.state.isOpened,}, () => {
-            this.props.compare(this.props.controller, this.state.isOpened);
-        });
+        this.props.compare(this.props.controller);
     }
 
     render() {
         return (
             <label>
                 <Toggle
-                    defaultChecked={this.state.isOpened}
+                    checked={!!this.props.controller.isOpen}
                     icons={false}
-                    disabled={this.props.isSafe}
-                    onChange={this._calculate.bind(this)}/>
+                    disabled={this.props.isSafe || this.props.isFull || this.props.isAbleToDrain}
+                    onChange={() => this._calculate()}/>
                 <span className="label-text">{this.props.controller.name}</span>
             </label>
         );

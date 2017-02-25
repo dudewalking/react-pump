@@ -3,8 +3,12 @@ import {Button} from "react-bootstrap";
 
 export default class Status extends React.Component {
 
-    _ableToDrain(){
+    _ableToDrain() {
         this.props.ableToDrain();
+    }
+
+    _updateStatus(status) {
+        this.props.updateStatus(status);
     }
 
     render() {
@@ -14,7 +18,10 @@ export default class Status extends React.Component {
                 <p>{this.props.status}</p>
 
                 {this.props.status === "Заполнение завершилось!"
-                    ? <Button onClick={() => this._ableToDrain()}>Запустить Слив</Button>
+                    ? <Button onClick={() => {
+                        this._ableToDrain();
+                        this._updateStatus("Слив запущен!");
+                    }}>Запустить Слив</Button>
                     : null
                 }
             </div>
