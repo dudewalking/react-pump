@@ -1,20 +1,27 @@
 import React from "react";
-import {ProgressBar, ButtonGroup} from "react-bootstrap";
-import {BootstrapTable, TableHeaderColumn} from "react-bootstrap-table";
 import {DataCheck} from "./solution-2/replacement.js";
 import {controllers} from "../data";
-import Toggle from "react-toggle";
+import Progress from "./progress.jsx";
+import PumpControllers from "./pump-controllers.jsx";
+import Machine from "./machine.jsx";
+import Status from "./status.jsx";
+import ControllersTable from "./controllers-table.jsx";
 
 
 export default class Pump extends React.Component {
+
     constructor() {
         super();
         this.state = {
             controllers: controllers,
             isSafe: false,
             isAllowed: true,
-            status: "Not active"
+            status: "Не активен"
         };
+    }
+
+    _updateStatus() {
+        this.setState({status: "Заполнение завершилось!"});
     }
 
     _compare(controller, isOpened) {
@@ -35,28 +42,28 @@ export default class Pump extends React.Component {
                     ctr.markerColor = "state-safe";
                     ctr.isCorrectOpen = true;
                     ctr.isOpenText = "ВКЛ.";
-                    ctr.isCorrectText = "БЕЗОПАСНО!";
-                    updatedStatus = `Controller №${ctr.id} is open`;
+                    ctr.isCorrectText = "БЕЗОПАСНО";
+                    updatedStatus = `Контроллер №${ctr.id} открыт`;
                 }
                 else if (isOpened && !result.markerColor) {
                     ctr.markerColor = "state-danger";
                     ctr.isCorrectOpen = false;
-                    ctr.isCorrectText = "ОПАСНО!";
-                    updatedStatus = `Controller №${ctr.id} must be closed!`;
+                    ctr.isCorrectText = "ОПАСНО";
+                    updatedStatus = `Контроллер №${ctr.id} должен быть закрыт!`;
                 }
                 else {
                     ctr.markerColor = "state-def";
                     ctr.isCorrectOpen = true;
                     ctr.isOpenText = "ВЫКЛ.";
                     ctr.isCorrectText = "НЕ АКТИВНО";
-                    updatedStatus = `Controller №${ctr.id} is closed`;
+                    updatedStatus = `Контроллер №${ctr.id} закрыт`;
                 }
             }
             return ctr;
         });
 
         if (controller.id === 1 && isOpened && result.markerColor) {
-            updatedStatus = "The filling has begun!";
+            updatedStatus = "Заполнение началось!";
             this.setState({isSafe: true});
         }
 
@@ -70,138 +77,19 @@ export default class Pump extends React.Component {
     render() {
         return (
             <div className="pump">
-                <PumpControllers controllers={this.state.controllers}
-                                 isSafe={this.state.isSafe}
+                <PumpControllers isSafe={this.state.isSafe}
+                                 controllers={this.state.controllers}
                                  compare={this._compare.bind(this)}/>
 
-                <Machine controllers={this.state.controllers} isSafe={this.state.isSafe}/>
+                <Machine isSafe={this.state.isSafe}
+                         controllers={this.state.controllers}/>
+
                 <Status status={this.state.status}/>
-                <Progress isSafe={this.state.isSafe}/>
+                <Progress isSafe={this.state.isSafe}
+                          updateStatus={() => this._updateStatus()}/>
+
                 <ControllersTable controllers={this.state.controllers}/>
             </div>
-        );
-    }
-}
-
-class PumpControllers extends React.Component {
-    _compare(controller, isOpened) {
-        this.props.compare(controller, isOpened);
-    }
-    render() {
-        const buttons = [...this.props.controllers].map(function (controller) {
-            return (
-                <Controller key={controller.id}
-                            controller={controller}
-                            isSafe={this.props.isSafe}
-                            controllers={this.props.controllers}
-                            compare={this._compare.bind(this)}/>
-            );
-        }, this);
-        return (
-            <ButtonGroup className="controllers">
-                {buttons}
-            </ButtonGroup>
-        );
-    }
-}
-
-class Controller extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            isOpened: false
-        };
-    }
-    _calculate() {
-        this.setState({isOpened: !this.state.isOpened,}, () => {
-            this.props.compare(this.props.controller, this.state.isOpened);
-        });
-    }
-    render() {
-        return (
-            <label>
-                <Toggle
-                    defaultChecked={this.state.isOpened}
-                    icons={false}
-                    disabled={this.props.isSafe}
-                    onChange={this._calculate.bind(this)} />
-                <span className="label-text">{this.props.controller.name}</span>
-            </label>
-        );
-    }
-}
-
-class Machine extends React.Component {
-    render() {
-        return (
-            <div className="center-side">
-                <Markers controllers={this.props.controllers}/>
-                <div className={this.props.isSafe ? "water" : ""}/>
-                <img src="./assets/svg/final-pump.svg" width="500px" height="500px"/>
-            </div>
-        );
-    }
-}
-
-class Status extends React.Component {
-    render() {
-        return (
-            <div className="right-side">
-                <p>Status:</p>
-                <p>{this.props.status}</p>
-            </div>
-        );
-    }
-}
-
-class Progress extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            progress: 0
-        };
-    }
-    render() {
-        return (
-            <ProgressBar style={{height: 20, width: 600}} max={100} min={0} active striped now={this.state.progress}
-                         label={`${this.state.progress}%`}/>
-        );
-    }
-}
-
-
-class Markers extends React.Component {
-    render() {
-        const markers = [...this.props.controllers].map(function (marker) {
-            return <Marker key={marker.id} name={marker.name} markerColor={marker.markerColor}/>;
-        });
-        return (
-            <div>
-                {markers}
-            </div>
-        );
-    }
-}
-
-
-class Marker extends React.Component {
-    render() {
-        return (
-            <div className={"markers marker-" + this.props.name + " " + this.props.markerColor}/>
-        );
-    }
-}
-
-
-class ControllersTable extends React.Component {
-    render() {
-        return (
-            <BootstrapTable data={this.props.controllers} striped hover>
-                <TableHeaderColumn isKey dataField='id'>Controller ID</TableHeaderColumn>
-                <TableHeaderColumn dataField='name'>Controller Name</TableHeaderColumn>
-                <TableHeaderColumn dataField='isOpenText'>On/Off</TableHeaderColumn>
-                <TableHeaderColumn dataField='isCorrectText'>Controller State</TableHeaderColumn>
-            </BootstrapTable>
         );
     }
 }

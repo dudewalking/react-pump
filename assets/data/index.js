@@ -1,7 +1,7 @@
 export let controllers = [
     {
         id: 1,
-        name: "one",
+        name: "Главный вентиль",
         isOpen: false,
         isCorrectOpen: true,
         isOpenText: "ВЫКЛ.",
@@ -10,7 +10,7 @@ export let controllers = [
     },
     {
         id: 2,
-        name: "two",
+        name: "Клапан",
         isOpen: false,
         isCorrectOpen: true,
         isOpenText: "ВЫКЛ",
@@ -19,7 +19,7 @@ export let controllers = [
     },
     {
         id: 3,
-        name: "three",
+        name: "Отвод",
         isOpen: false,
         isCorrectOpen: true,
         isOpenText: "ВЫКЛ",
@@ -28,7 +28,7 @@ export let controllers = [
     },
     {
         id: 4,
-        name: "four",
+        name: "Слив",
         isOpen: false,
         isCorrectOpen: true,
         isOpenText: "ВЫКЛ",
@@ -37,7 +37,7 @@ export let controllers = [
     },
     {
         id: 5,
-        name: "five",
+        name: "Вентиляция",
         isOpen: false,
         isCorrectOpen: true,
         isOpenText: "ВЫКЛ",
