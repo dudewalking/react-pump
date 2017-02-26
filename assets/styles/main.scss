@@ -4,26 +4,20 @@
 @import "../../node_modules/react-bootstrap-table/dist/react-bootstrap-table-all.min.css";
 @import "./react-toggle";
 
-
-.none {
-  display: block;
-}
-
-.show {
-  display: none;
-}
-
 .pump {
   display: inline-flex;
-  width: 900px;
+  width: 1000px;
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
 }
 
+.controllers {
+  width: 195px;
+}
+
 .right-side {
-  position: absolute;
-  top: 150px;
+  width: 250px;
 }
 
 .center-side {
@@ -34,7 +28,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 800px;
+  min-height: 600px;
 }
 
 .main-menu {
@@ -138,9 +132,4 @@
   background: green;
   opacity: 0.5;
 }
-
-.controllers {
-  width: 180px;
-}
-
 
